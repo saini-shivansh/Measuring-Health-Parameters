@@ -1,6 +1,6 @@
 import pandas as pd
 
-path = r'C:\Users\Shivansh Saini\Downloads\healthcare-dataset-stroke-data.csv'
+path = r'your data here'
 data = pd.read_csv(path)
 
 from sklearn.model_selection import train_test_split
