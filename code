@@ -1,0 +1,142 @@
+import pandas as pd
+
+path = r'C:\Users\Shivansh Saini\Downloads\healthcare-dataset-stroke-data.csv'
+data = pd.read_csv(path)
+
+from sklearn.model_selection import train_test_split
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+import pandas as pd
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
+
+# Load data
+
+
+# Data preprocessing
+X = data.drop(columns=['stroke', 'Unnamed: 1', 'id'])  # Features
+y = data['stroke']  # Target variable
+
+# Handle missing values
+imputer = SimpleImputer(strategy='median')
+X['bmi'] = imputer.fit_transform(X[['bmi']])
+
+# Encode categorical variables
+categorical_cols = ['ever_married', 'work_type', 'Residence_type', 'smoking_status']
+preprocessor = ColumnTransformer(
+    transformers=[('cat', OneHotEncoder(), categorical_cols)],
+    remainder='passthrough')
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Model training
+model = Pipeline(steps=[('preprocessor', preprocessor),
+                        ('classifier', RandomForestClassifier())])
+model.fit(X_train, y_train)
+
+# Model evaluation
+y_pred = model.predict(X_test)
+print(classification_report(y_test, y_pred))
+
+from sklearn.metrics import accuracy_score
+
+# Calculate accuracy
+accuracy = accuracy_score(y_test, y_pred)
+print("\nAccuracy of the Random Forest:", accuracy*100)
+
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+
+# Define preprocessing pipelines for scaled and unscaled data
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+
+# Define numerical and categorical columns
+numerical_cols = ['age', 'hypertension', 'heart_disease', 'avg_glucose_level', 'bmi']
+categorical_cols = ['ever_married', 'work_type', 'Residence_type', 'smoking_status']
+
+# Define preprocessing pipelines for scaled and unscaled data
+preprocessor_unscaled = ColumnTransformer(
+    transformers=[
+        ('num', 'passthrough', numerical_cols),
+        ('cat', OneHotEncoder(), categorical_cols)
+    ])
+
+preprocessor_scaled = ColumnTransformer(
+    transformers=[
+        ('num', StandardScaler(), numerical_cols),
+        ('cat', OneHotEncoder(), categorical_cols)
+    ])
+
+# Define pipelines for KNN and SVM
+unscaled_pipeline_knn = Pipeline(steps=[('preprocessor', preprocessor_unscaled),
+                                        ('classifier', KNeighborsClassifier())])
+
+scaled_pipeline_knn = Pipeline(steps=[('preprocessor', preprocessor_scaled),
+                                      ('classifier', KNeighborsClassifier())])
+
+unscaled_pipeline_svm = Pipeline(steps=[('preprocessor', preprocessor_unscaled),
+                                        ('classifier', SVC())])
+
+scaled_pipeline_svm = Pipeline(steps=[('preprocessor', preprocessor_scaled),
+                                      ('classifier', SVC())])
+
+# Train and evaluate models
+def train_and_evaluate(pipeline):
+    pipeline.fit(X_train, y_train)
+    y_pred = pipeline.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+    return accuracy
+
+# Print accuracy
+print("\nAccuracy of KNN (Unscaled):", train_and_evaluate(unscaled_pipeline_knn)*100)
+print("Accuracy of KNN (Scaled):", train_and_evaluate(scaled_pipeline_knn)*100)
+print("\nAccuracy of SVM (Unscaled):", train_and_evaluate(unscaled_pipeline_svm)*100)
+print("Accuracy of SVM (Scaled):", train_and_evaluate(scaled_pipeline_svm)*100)
+print("")
+
+
+# No need to split data for KMeans clustering (it's unsupervised)
+X = data.drop(columns=['stroke', 'Unnamed: 1', 'id'])  # Features
+
+# Handle missing values (similar to previous code)
+imputer = SimpleImputer(strategy='median')
+X['bmi'] = imputer.fit_transform(X[['bmi']])
+
+# Encode categorical variables (similar to previous code)
+categorical_cols = ['ever_married', 'work_type', 'Residence_type', 'smoking_status']
+preprocessor = ColumnTransformer(
+    transformers=[('cat', OneHotEncoder(), categorical_cols)],
+    remainder='passthrough')
+
+X_preprocessed = preprocessor.fit_transform(X)
+
+# KMeans Clustering
+# Define the number of clusters (experiment with different values)
+n_clusters = 3
+
+kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+kmeans.fit(X_preprocessed)
+
+# Get cluster labels
+cluster_labels = kmeans.labels_
+
+# Evaluate using Silhouette Coefficient
+silhouette_coeff = silhouette_score(X_preprocessed, cluster_labels)
+print("\n\nSilhouette Coefficient:", silhouette_coeff)
+
+# Note: You can't use classification metrics like accuracy for KMeans
+
+# (Optional) Visualize clusters (using libraries like matplotlib)
+# You can plot features on a scatter plot and color points based on cluster labels
+
